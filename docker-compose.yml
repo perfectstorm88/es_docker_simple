@@ -4,8 +4,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
     environment:
       - cluster.name=myEs
-      #- bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - ELASTIC_PASSWORD=elastic
       - xpack.license.self_generated.type=trial
       - xpack.security.enabled=true
@@ -17,8 +17,7 @@ services:
       - ./plugins:/usr/share/elasticsearch/plugins      
       - esdata1:/usr/share/elasticsearch/data
     ports:
-      - 9201:9200
-      - 9301:9300
+      - 9200:9200
     networks:
       - esnet1
     healthcheck:
@@ -30,8 +29,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
     environment:
       - cluster.name=myEs
-      #- bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "discovery.zen.ping.unicast.hosts=elasticsearch"
       - ELASTIC_PASSWORD=elastic
       - xpack.license.self_generated.type=trial
@@ -51,7 +50,6 @@ services:
     ports:
      - 5601:5601
     environment:
-     #ELASTICSEARCH_URL: http://es01:9200
       ELASTICSEARCH_HOSTS: http://es01:9200
       ELASTICSEARCH_USERNAME: "elastic"
       ELASTICSEARCH_PASSWORD: "elastic"
