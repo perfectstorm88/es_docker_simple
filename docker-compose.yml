@@ -1,0 +1,85 @@
+version: '2.2'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+    environment:
+      - cluster.name=myEs
+      #- bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - ELASTIC_PASSWORD=elastic
+      - xpack.license.self_generated.type=trial
+      - xpack.security.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./plugins:/usr/share/elasticsearch/plugins      
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+      - 9301:9300
+    networks:
+      - esnet1
+    healthcheck:
+      test: curl  -u elastic:elastic http://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+    environment:
+      - cluster.name=myEs
+      #- bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+      - ELASTIC_PASSWORD=elastic
+      - xpack.license.self_generated.type=trial
+      - xpack.security.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+      - ./plugins:/usr/share/elasticsearch/plugins      
+    networks:
+      - esnet1
+
+  kib01:
+    image: kibana:6.6.2
+    ports:
+     - 5601:5601
+    environment:
+     #ELASTICSEARCH_URL: http://es01:9200
+      ELASTICSEARCH_HOSTS: http://es01:9200
+      ELASTICSEARCH_USERNAME: "elastic"
+      ELASTICSEARCH_PASSWORD: "elastic"
+    depends_on: 
+     - es01
+    networks:
+     - esnet1
+
+  wait_until_ready:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.2
+    command: /usr/bin/true
+    depends_on: 
+      es01:
+        condition: service_healthy
+
+volumes:
+  esdata1:
+  esdata2:
+
+networks:
+  esnet1:
+
+
+
+
+
+
+
+
+
+
